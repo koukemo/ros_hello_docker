@@ -1,0 +1,31 @@
+version: '3'
+services:
+  ros-master:
+    container_name: ros-master
+    build: .
+    tty: true
+    network_mode: "host"
+    command: stdbuf -o L roscore
+
+  ros-bridge:
+    container_name: ros-bridge
+    build: .
+    tty: true
+    network_mode: "host"
+    depends_on:
+      - ros-master
+    environment:
+      - "ROS_MASTER_URI=http://localhost:11311"
+    command: /bin/bash -c "source /root/ros_ws/devel/setup.bash; roslaunch rosbridge_server rosbridge_websocket.launch"
+
+  ros-work:
+    container_name: ros-work
+    build: .
+    tty: true
+    network_mode: "host"
+    depends_on:
+      - ros-master
+      - ros-bridge
+    environment:
+      - "ROS_MASTER_URI=http://localhost:11311"
+    #command: /bin/bash -c "source /root/ros_ws/devel/setup.bash; rosrun hello_ros hello.py"
